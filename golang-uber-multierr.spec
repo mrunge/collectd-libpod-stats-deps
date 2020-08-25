@@ -78,7 +78,9 @@ sort -u -o devel.file-list devel.file-list
 %check
 %endif
 
-%gopkgfiles
+%files -f devel.file-list
+%license LICENSE.txt
+%doc README.md
 
 %changelog
 * Fri Aug 07 16:58:29 CEST 2020 Robert-André Mauchin <zebob.m@gmail.com> - 1.5.0-1
