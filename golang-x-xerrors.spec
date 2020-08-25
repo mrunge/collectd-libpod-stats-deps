@@ -20,7 +20,7 @@
 This package holds the transition packages for the new Go 1.13 error values.
 See golang.org/design/29934-error-values.}
 
-Name:           %{goname}
+Name:           golang-x-xerrors
 Version:        0
 Release:        0.1%{?dist}
 Summary:        Transition packages for the new Go 1.13 error values
