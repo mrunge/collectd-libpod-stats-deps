@@ -40,6 +40,7 @@ BuildArch:     noarch
 %description devel
 %{common_description}
 
+Provides: golang(%{goipath})
 This package contains library source intended for
 building other packages which use import path with
 %{goipath} prefix.

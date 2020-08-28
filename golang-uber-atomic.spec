@@ -31,7 +31,7 @@ Summary:        Wrapper types for sync/atomic which enforce atomic access
 
 License:        MIT
 URL:            https://%{provider_prefix}
-Source0:        https://%{provider_prefix}/archive/v%{release}.tar.gz#/%{repo}-%{version}.tar.gz
+Source0:        https://%{provider_prefix}/archive/v%{version}.tar.gz#/%{repo}-%{version}.tar.gz
 
 %if %{with check}
 # Tests
