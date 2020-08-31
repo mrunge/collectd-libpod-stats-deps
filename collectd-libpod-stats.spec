@@ -10,7 +10,6 @@
 %global repo            collectd-libpod-stats
 %global provider_prefix %{provider}.%{provider_tld}/%{project}/%{repo}
 %global import_path     github.com/pleimer/collectd-libpod-stats
-# %global commit          ac6580df4449443a05718fd7858c1f91ad5f8d20
 %global shortcommit     %(c=%{commit}; echo ${c:0:7})
 
 
@@ -58,20 +57,26 @@ Requires:  collectd
 
 %prep
 %setup -q -n %{repo}-%{version}
-%setup -T -D -q -a 1 -n %{extractdir}
-mkdir %{gobuilddir}/src/collectd.org/
-cd %{gobuilddir}/src/collectd.org/
+# %setup -T -D -q -a 1 -n %{extractdir}
+%global gobuilddir $(pwd)
+
+mkdir -p %{gobuilddir}/src/github.com/pleimer/collectd-libpod-stats
+pushd %{gobuilddir}/src/github.com/pleimer/collectd-libpod-stats
+gzip -dc %{SOURCE0} | tar --strip-components=1 -xvvf -
+popd
+mkdir -p %{gobuilddir}/src/collectd.org/
+pushd %{gobuilddir}/src/collectd.org/
+gzip -dc %{SOURCE1} | tar --strip-components=1 -xvvf -
 gzip -dc %{SOURCE2} | tar --strip-components=1 -xvvf -
 
 %build
-export COLLECTD_SRC="%{_builddir}/%{extractdir}/collectd-collectd-%{collectd_version}"
-cd $COLLECTD_SRC
+pushd %{gobuilddir}/src/collectd.org/
 ./build.sh
 
 # must run collectd configure for go-collectd dependencies
 ./configure
-
-CGO_CPPFLAGS="-I${COLLECTD_SRC}/src/daemon -I${COLLECTD_SRC}/src" \
+popd
+CGO_CPPFLAGS="-I%{gobuilddir}/src/collectd.org/src/daemon -I%{gobuilddir}/src/collectd.org/src" \
 GOPATH="%{gobuilddir}:${GOPATH:+${GOPATH}:}/usr/share/gocode" GO111MODULE=off \
 go build -buildmode c-shared -compiler gc -tags="rpm_crashtraceback ${BUILDTAGS:-}" -ldflags "${LDFLAGS:-}-X github.com/pleimer/collectd-libpod-stats/version=1.0 -B 0x$(head -c20 /dev/urandom|od -An -tx1|tr -d ' \n') -extldflags '-Wl,-z,relro -Wl,--as-needed  -Wl,-z,now -specs=/usr/lib/rpm/redhat/redhat-hardened-ld '" -a -v -x -o %{gobuilddir}/lib/%{plugin_name}.so %{goipath}/plugin/
 
@@ -79,11 +84,11 @@ go build -buildmode c-shared -compiler gc -tags="rpm_crashtraceback ${BUILDTAGS:
 %install
 install -m 0755 -vd %{buildroot}%{_libdir}/collectd/ %{buildroot}%{_datadir}/collectd/
 install -m 0755 -vp %{gobuilddir}/lib/* %{buildroot}%{_libdir}/collectd/ 
-install -m 0644 -vp %{_builddir}/%{extractdir}/types.db.%{plugin_name} %{buildroot}%{_datadir}/collectd/
+install -m 0644 -vp types.db.%{plugin_name} %{buildroot}%{_datadir}/collectd/
 
 %if %{with check}
 %check
-%gocheck
+# %gocheck
 %endif
 
 %files
